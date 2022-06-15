@@ -52,17 +52,36 @@ func tcpConnect(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte("group参数不正确"))
 		return
 	}
-	print(groupUrl.(string))
-	dest, err := http.Get(groupUrl.(string))
+
+	url := groupUrl.(string)
+	// dest, err := http.Get(url)
+	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
-	status := dest.StatusCode
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		res.Write([]byte("请求失败"))
+		return
+	}
+	status := response.StatusCode
 	var result []byte
 	if status == http.StatusOK {
 		result = []byte(fmt.Sprintf("%s前置服务状态正常", group))
 	} else {
 		result = []byte(fmt.Sprintf("%s前置服务状态异常", group))
 	}
+
+	// cmd := exec.Command("/bin/sh", "-c", `ls -l`)
+	// stdout, _ := cmd.StdoutPipe()
+	// outBytes, _ := ioutil.ReadAll(stdout)
+	// out := string(outBytes)
+	// var result []byte
+	// if out == "200" {
+	// 	result = []byte("请求成功")
+	// } else {
+	// 	result = []byte("请求失败")
+	// }
 	res.Write(result)
 }
